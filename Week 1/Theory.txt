@@ -1,0 +1,59 @@
+1. Write decimal 11 in binary.
+1011
+2. Write decimal 47 in binary.
+101111
+3. Write decimal 127 in binary.
+1111111
+4. Write decimal 354 in binary.
+101100010
+5. Write decimal 697 in binary.
+1010111001
+6. Write binary 1011 in decimal.
+11
+7. Write binary 111011 in decimal.
+59
+8. Write binary 10001010 in decimal.
+138
+9. Write binary 11011011 in decimal.
+219
+10. Write binary 10111010 in decimal.
+186
+11. Write binary 1011 in hex-decimal.
+B
+12. Write binary 111011 in hex-decimal.
+3B
+13. Write binary 10001010 in hex-decimal.
+8A
+14. Write binary 11011011 in hex-decimal.
+DB
+15. Write binary 10111010 in hex-decimal.
+BA
+
+How many bytes can you index with 16 bits
+2^16
+
+Sometimes, you get programs for in “32-bit” vs “64-bit” versions, for
+instance operating sysmtems. Why do you think this is?
+How many unique memory locations the CPU has
+
+Up to new years eve 1999, people were extrememly concerned about
+the so-called Y2K bug. What was the cause of this “bug”?
+The expected issue where dates were store in 2 digits and represented 19XX date,
+thus 2000 would be represented the same as 1900 as the last two digits are the only
+ones to change.
+
+How many bits are needed to store 800 by 600 pixels gray scale image with 8 bits for
+intensity values?
+800 * 600 * 8
+
+How many bits are needed to store 800 by 600 pixel RGB image with 8 bits of
+intensity levels per channel?
+800 * 600 * 8 * 3
+
+How many bytes are needed to store a whole slide image of 12000 by 1600 pixels
+with 256 intensity levels (single channel)?
+12000 * 1600 * 8 / 8
+
+How many kilobytes are needed to store a whole slide RGB image measuring 32000
+by 32000 pixels with 256 intensity levels per color channel?
+32000 * 32000 * 8 * 3 / 8 / 1024
