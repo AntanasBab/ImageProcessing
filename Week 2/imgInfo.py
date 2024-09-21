@@ -75,4 +75,4 @@ def dirImgInfo(directory):
             ImgTiffinfo(tifImg)
             tifImg.close()
 
-#dirImgInfo('./ImgSet1')
+# dirImgInfo('./ImgSet1')
