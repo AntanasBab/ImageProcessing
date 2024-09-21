@@ -29,6 +29,18 @@ def getPhotometricStr(intVal):
 def getImgPlane(intVal):
     return 'single image plane' if intVal == 1 else 'seperate image plane'
 
+def isImgTiled(tifImg):
+    tile_width = tifImg.GetField('TileWidth')
+    tile_length = tifImg.GetField('TileLength')
+    rows_per_strip = tifImg.GetField('RowsPerStrip')
+
+    if tile_width and tile_length:
+        return True
+    elif rows_per_strip:
+        return False
+    else:
+        raise Exception(f"Image does not contain tiling or strip information.")
+
 def ImgTiffinfo(tifImg):
     print('Subfile Type: ' + str(tifImg.GetField('SUBFILETYPE')))
     print('Image Width: ' + str(tifImg.GetField('IMAGEWIDTH')) + ' Image Length: ' + str(tifImg.GetField('IMAGELENGTH')) + ' Image Depth: ' + str(tifImg.GetField('IMAGEDEPTH')))
@@ -37,13 +49,12 @@ def ImgTiffinfo(tifImg):
     tile_width = tifImg.GetField('TileWidth')
     tile_length = tifImg.GetField('TileLength')
     rows_per_strip = tifImg.GetField('RowsPerStrip')
+    isTiled = isImgTiled(tifImg)
 
-    if tile_width and tile_length:
+    if isTiled:
         print(f"Image is tiled with TileWidth={tile_width}, TileLength={tile_length}.")
-    elif rows_per_strip:
-        print(f"Image is striped with RowsPerStrip={rows_per_strip}.")
     else:
-        print(f"Image does not contain tiling or strip information.")
+        print(f"Image is striped with RowsPerStrip={rows_per_strip}.")
 
     print('-------------------')
     print('Bits/Sample: ' + str(tifImg.GetField('BITSPERSAMPLE')))
@@ -64,4 +75,4 @@ def dirImgInfo(directory):
             ImgTiffinfo(tifImg)
             tifImg.close()
 
-dirImgInfo('./ImgSet1')
+#dirImgInfo('./ImgSet1')
