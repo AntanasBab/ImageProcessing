@@ -16,7 +16,7 @@ def compute_stretch(image, s_min=0, s_max=255):
     if r_max == r_min:
         return np.full(image.shape, s_min if r_max < 128 else s_max, dtype=np.uint8)
     
-    stretched = (image - r_min) / (r_max - r_min) * (s_max - s_min) + s_min - 10
+    stretched = (image - r_min) / (r_max - r_min) * (s_max - s_min) + s_min
     return stretched
 
 def apply_stretch(image):
