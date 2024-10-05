@@ -27,9 +27,6 @@ def readImgSubRegion(tiffImg, tile_x1, tile_y1, tile_x2, tile_y2):
 
 tifImg = TIFF.open('ImgSet1/imgset1/Kidney1.tif')
 img = readImgSubRegion(tifImg, 0, 0, 5, 11)
-curImg = img
-plt.imshow(curImg)
-plt.show()
-plt.imshow(TIFF.read_tiles(tifImg))
+plt.imshow(img, interpolation='nearest', vmin=0, vmax=255)
 plt.show()
 tifImg.close()
