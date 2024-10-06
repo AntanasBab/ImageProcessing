@@ -28,7 +28,7 @@ def main(image_path):
     plot_histogram(histogram)
 
 if len(sys.argv) != 2:
-    print("Usage: python histogramCalculation.py <image_path>")
+    print("Usage: python3 histogramCalculation.py <image_path>")
     sys.exit(1)
 
 image_path = sys.argv[1]

@@ -35,7 +35,7 @@ def main(image_path, threshold_value):
     plt.show()
 
 if len(sys.argv) != 3:
-    print("Usage: python script.py <image_path> <threshold_value>")
+    print("Usage: python3 script.py <image_path> <threshold_value>")
     sys.exit(1)
 
 image_path = sys.argv[1]

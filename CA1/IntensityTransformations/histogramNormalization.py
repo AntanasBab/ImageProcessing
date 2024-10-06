@@ -39,7 +39,7 @@ def apply_histogram_normalization(image_path):
     plt.show()
 
 if len(sys.argv) != 2:
-    print("Usage: python histogramNormalization.py <image_path>")
+    print("Usage: python3 histogramNormalization.py <image_path>")
     sys.exit(1)
 
 image_path = sys.argv[1]
