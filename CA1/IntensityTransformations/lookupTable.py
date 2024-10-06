@@ -42,7 +42,7 @@ def main(image_path):
     
     gamma_corrected_image = power_law_lut(image, gamma=2.0)
     
-    thresholded_image = threshold_lut(image, threshold_value=128)
+    thresholded_image = threshold_lut(image, threshold_value=180)
     
     plt.figure(figsize=(15, 10))
     
@@ -59,7 +59,7 @@ def main(image_path):
     plt.imshow(gamma_corrected_image, cmap='gray', vmin=0, vmax=255)
     
     plt.subplot(2, 2, 4)
-    plt.title("Thresholded Image (Threshold = 128)")
+    plt.title("Thresholded Image (Threshold = 180)")
     plt.imshow(thresholded_image, cmap='gray', vmin=0, vmax=255)
     
     plt.show()
