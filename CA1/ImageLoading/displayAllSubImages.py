@@ -1,5 +1,6 @@
 from libtiff import TIFF
 import matplotlib.pyplot as plt
+import sys
 
 def viewSubImages(file_path):
     tifImg = TIFF.open(file_path)
@@ -18,4 +19,10 @@ def viewSubImages(file_path):
     plt.tight_layout()
     plt.show()
 
-viewSubImages('ImgSet1/imgset1/Kidney2_RGB2_20x.svs')
+if len(sys.argv) != 2:
+    print("Usage: python3 displayAllSubImages.py <image_path>")
+    sys.exit(1)
+
+image_path = sys.argv[1]
+
+viewSubImages(image_path)

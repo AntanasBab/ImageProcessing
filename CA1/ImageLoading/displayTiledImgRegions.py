@@ -1,6 +1,7 @@
 import numpy as np
 from libtiff import TIFF
 from matplotlib import pyplot as plt
+import sys
 
 def readImgSubRegion(tiffImg, tile_x1, tile_y1, tile_x2, tile_y2): 
     tile_width = tiffImg.GetField('TileWidth')
@@ -25,7 +26,13 @@ def readImgSubRegion(tiffImg, tile_x1, tile_y1, tile_x2, tile_y2):
     result = np.concatenate(res, axis=0)
     return result
 
-tifImg = TIFF.open('ImgSet1/imgset1/Kidney1.tif')
+if len(sys.argv) != 2:
+    print("Usage: python3 displayTiledImgRegions.py <image_path>")
+    sys.exit(1)
+
+image_path = sys.argv[1]
+
+tifImg = TIFF.open(image_path)
 img = readImgSubRegion(tifImg, 0, 0, 5, 11)
 plt.imshow(img, interpolation='nearest', vmin=0, vmax=255)
 plt.show()
