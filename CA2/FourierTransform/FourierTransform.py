@@ -17,6 +17,7 @@ def pad_image(image):
     padded_image[:M, :N] = image  # Place original image in the top-left corner
     return padded_image
 
+# Step 3: Shift the image for periodicity by multiplying by (-1)^(x + y)
 def shift_image_for_periodicity(padded_image):
     M, N = padded_image.shape
     shifted_image = padded_image.copy()
@@ -26,8 +27,35 @@ def shift_image_for_periodicity(padded_image):
             shifted_image[x, y] *= (-1) ** (x + y)
     return shifted_image
 
-# Step 5: Visualize the steps
-def visualize_steps(original, padded, shifted):
+# Step 4: Compute DFT (F(u, v)) using FFTW plan
+def compute_dft(shifted_image):
+    M, N = shifted_image.shape
+    dft_input = pyfftw.empty_aligned((M, N), dtype='complex128')
+    dft_output = pyfftw.empty_aligned((M, N), dtype='complex128')
+    
+    # Create the FFTW plan
+    dft_plan = pyfftw.FFTW(dft_input, dft_output, direction='FFTW_FORWARD', flags=('FFTW_ESTIMATE',))
+    
+    # Copy the shifted image to the DFT input
+    dft_input[:] = shifted_image_display
+    
+    # Execute the DFT
+    dft_plan()  # Run the DFT plan
+    
+    return dft_output
+
+# Step 5: Visualize the DFT (F(u, v))
+def visualize_dft(dft_output):
+    # Compute the magnitude for visualization
+    magnitude = np.log(1 + np.abs(dft_output))  # Use log scale for better visibility
+    plt.figure(figsize=(6, 6))
+    plt.imshow(magnitude, cmap='gray')
+    plt.title('Magnitude of DFT (F(u, v))')
+    plt.axis('off')
+    plt.show()
+
+# Step 6: Visualize the steps
+def visualize_steps(original, padded, shifted, dft_output):
     fig, axs = plt.subplots(2, 2, figsize=(12, 12))
 
     # Original image
@@ -38,9 +66,14 @@ def visualize_steps(original, padded, shifted):
     axs[0, 1].imshow(padded, cmap='gray')
     axs[0, 1].set_title('Padded Image (2M x 2N)')
 
+    # Shifted image
     shifted_image_display = np.log(1 + np.abs(shifted))
     axs[1, 0].imshow(shifted_image_display, cmap='gray')
     axs[1, 0].set_title('Shifted Image for Periodicity')
+
+    # Magnitude of DFT
+    axs[1, 1].imshow(np.log(1 + np.abs(dft_output)), cmap='gray')
+    axs[1, 1].set_title('Magnitude of DFT (F(u, v))')
 
     for ax in axs.flat:
         ax.axis('off')
@@ -59,8 +92,11 @@ def main(image_path):
     # Step 3: Shift the image for periodicity
     shifted_image = shift_image_for_periodicity(padded_image)
 
+    # Step 4: Compute the DFT (F(u, v))
+    dft_output = compute_dft(shifted_image)
+
     # Step 5: Visualize each step
-    visualize_steps(original_image, padded_image, shifted_image)
+    visualize_steps(original_image, padded_image, shifted_image, dft_output)
 
 # Example usage
 if len(sys.argv) != 2:
