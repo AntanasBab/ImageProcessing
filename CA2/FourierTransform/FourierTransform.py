@@ -54,7 +54,7 @@ def process_image(filename):
     plt.title("Original Image")
     
     plt.subplot(1, 3, 2)
-    plt.imshow(np.abs(padded_image), cmap='gray')
+    plt.imshow(padded_image, cmap='gray')
     plt.title("Padded Image")
     
     plt.subplot(1, 3, 3)
