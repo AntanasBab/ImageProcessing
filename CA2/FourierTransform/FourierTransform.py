@@ -1,107 +1,97 @@
 import numpy as np
 import matplotlib.pyplot as plt
-import pyfftw  # FFTW3 library for Fourier Transforms
 from libtiff import TIFF
 import sys
 
-# Step 1: Input image M x N
-def read_image(filepath):
-    tif = TIFF.open(filepath)
-    image = tif.read_image()
-    return np.array(image, dtype=np.float32)
+def load_image(image_path):
+    tifImg = TIFF.open(image_path)
+    image = tifImg.read_image()
+    tifImg.close()
+    return image
 
-# Step 2: Pad image to 2M x 2N
 def pad_image(image):
     M, N = image.shape
-    padded_image = np.zeros((2 * M, 2 * N), dtype=np.float32)
-    padded_image[:M, :N] = image  # Place original image in the top-left corner
+    padded_image = np.zeros((2 * M, 2 * N), dtype=np.complex128)  # Use complex type
+    padded_image[:M, :N] = image  # Copy the original image to the top-left corner
     return padded_image
 
-# Step 3: Shift the image for periodicity by multiplying by (-1)^(x + y)
-def shift_image_for_periodicity(padded_image):
-    M, N = padded_image.shape
-    shifted_image = padded_image.copy()
-    
-    for x in range(M):
-        for y in range(N):
-            shifted_image[x, y] *= (-1) ** (x + y)
+def shift_image_for_periodicity(image):
+    M, N = image.shape
+    x, y = np.meshgrid(np.arange(M), np.arange(N), indexing='ij')
+    shift_factor = (-1) ** (x + y)
+    shifted_image = image * shift_factor  # Element-wise multiplication with shift factor
     return shifted_image
 
-# Step 4: Compute DFT (F(u, v)) using FFTW plan
-def compute_dft(shifted_image):
-    M, N = shifted_image.shape
-    dft_input = pyfftw.empty_aligned((M, N), dtype='complex128')
-    dft_output = pyfftw.empty_aligned((M, N), dtype='complex128')
+def forward_fourier_transform(image):
+    return np.fft.fft2(image)
+
+def inverse_fourier_transform(fft_image):
+    return np.fft.ifft2(fft_image) 
+
+def apply_periodicity_to_real(ifft_image):
+    M, N = ifft_image.shape
+    x, y = np.meshgrid(np.arange(M), np.arange(N), indexing='ij')
+    shift_factor = (-1) ** (x + y)
+    real_part_shifted = np.real(ifft_image) * shift_factor
+    return real_part_shifted
+
+def extract_upper_left_quadrant(image):
+    M, N = image.shape
+    return image[:M // 2, :N // 2]
+
+def process_image(filename):
+    original_image = load_image(filename)
     
-    # Create the FFTW plan
-    dft_plan = pyfftw.FFTW(dft_input, dft_output, direction='FFTW_FORWARD', flags=('FFTW_ESTIMATE',))
+    padded_image = pad_image(original_image)
     
-    # Copy the shifted image to the DFT input
-    dft_input[:] = shifted_image_display
+    shifted_image = shift_image_for_periodicity(padded_image)
     
-    # Execute the DFT
-    dft_plan()  # Run the DFT plan
+    # Plot original, padded, and shifted images
+    plt.figure(figsize=(15, 5))
     
-    return dft_output
-
-# Step 5: Visualize the DFT (F(u, v))
-def visualize_dft(dft_output):
-    # Compute the magnitude for visualization
-    magnitude = np.log(1 + np.abs(dft_output))  # Use log scale for better visibility
-    plt.figure(figsize=(6, 6))
-    plt.imshow(magnitude, cmap='gray')
-    plt.title('Magnitude of DFT (F(u, v))')
-    plt.axis('off')
-    plt.show()
-
-# Step 6: Visualize the steps
-def visualize_steps(original, padded, shifted, dft_output):
-    fig, axs = plt.subplots(2, 2, figsize=(12, 12))
-
-    # Original image
-    axs[0, 0].imshow(original, cmap='gray')
-    axs[0, 0].set_title('Original Image')
-
-    # Padded image
-    axs[0, 1].imshow(padded, cmap='gray')
-    axs[0, 1].set_title('Padded Image (2M x 2N)')
-
-    # Shifted image
-    shifted_image_display = np.log(1 + np.abs(shifted))
-    axs[1, 0].imshow(shifted_image_display, cmap='gray')
-    axs[1, 0].set_title('Shifted Image for Periodicity')
-
-    # Magnitude of DFT
-    axs[1, 1].imshow(np.log(1 + np.abs(dft_output)), cmap='gray')
-    axs[1, 1].set_title('Magnitude of DFT (F(u, v))')
-
-    for ax in axs.flat:
-        ax.axis('off')
-
+    plt.subplot(1, 3, 1)
+    plt.imshow(original_image, cmap='gray')
+    plt.title("Original Image")
+    
+    plt.subplot(1, 3, 2)
+    plt.imshow(np.abs(padded_image), cmap='gray')
+    plt.title("Padded Image")
+    
+    plt.subplot(1, 3, 3)
+    plt.imshow(np.abs(shifted_image), cmap='gray')
+    plt.title("Shifted Image")
+    
     plt.tight_layout()
     plt.show()
+    
+    fft_image = forward_fourier_transform(shifted_image)
+    
+    magnitude_spectrum = np.log(1 + np.abs(fft_image))
+    plt.imshow(magnitude_spectrum, cmap='gray')
+    plt.title('Magnitude Spectrum of DFT')
+    plt.colorbar()
+    plt.show()
 
-# Main function to execute all steps
-def main(image_path):
-    # Step 1: Load the image
-    original_image = read_image(image_path)
+    ifft_image = inverse_fourier_transform(fft_image)
+    real_part_shifted = apply_periodicity_to_real(ifft_image)
+    
+    upper_left_image = extract_upper_left_quadrant(real_part_shifted)
 
-    # Step 2: Pad the image
-    padded_image = pad_image(original_image)
+    plt.figure(figsize=(10, 5))
+    
+    plt.subplot(1, 2, 1)
+    plt.imshow(np.abs(real_part_shifted), cmap='gray')
+    plt.title("IDFT with Periodicity Shift")
+    
+    plt.subplot(1, 2, 2)
+    plt.imshow(np.abs(upper_left_image), cmap='gray')
+    plt.title("Upper-Left Quadrant of IDFT")
+    
+    plt.show()
 
-    # Step 3: Shift the image for periodicity
-    shifted_image = shift_image_for_periodicity(padded_image)
-
-    # Step 4: Compute the DFT (F(u, v))
-    dft_output = compute_dft(shifted_image)
-
-    # Step 5: Visualize each step
-    visualize_steps(original_image, padded_image, shifted_image, dft_output)
-
-# Example usage
 if len(sys.argv) != 2:
     print("Usage: python FourierTransform.py <image_path>")
     sys.exit(1)
 
 image_path = sys.argv[1]
-main(image_path)
+process_image(image_path)
