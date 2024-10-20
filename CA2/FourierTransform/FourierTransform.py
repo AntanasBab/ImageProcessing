@@ -17,23 +17,17 @@ def pad_image(image):
     padded_image[:M, :N] = image  # Place original image in the top-left corner
     return padded_image
 
-# Step 3: Shift the image for periodicity by multiplying by (-1)^(x + y)
 def shift_image_for_periodicity(padded_image):
     M, N = padded_image.shape
-    shifted_image = padded_image * np.fromfunction(lambda x, y: (-1) ** (x + y), (M, N))
+    shifted_image = padded_image.copy()
+    
+    for x in range(M):
+        for y in range(N):
+            shifted_image[x, y] *= (-1) ** (x + y)
     return shifted_image
 
-# Step 4: Compute the DFT using FFTW3
-def compute_dft(shifted_image):
-    fft_input = pyfftw.empty_aligned(shifted_image.shape, dtype='complex64')
-    fft_output = pyfftw.empty_aligned(shifted_image.shape, dtype='complex64')
-    fft_input[:] = shifted_image
-    fft_object = pyfftw.FFTW(fft_input, fft_output, direction='FFTW_FORWARD')
-    dft_result = fft_object()
-    return dft_result
-
 # Step 5: Visualize the steps
-def visualize_steps(original, padded, shifted, dft):
+def visualize_steps(original, padded, shifted):
     fig, axs = plt.subplots(2, 2, figsize=(12, 12))
 
     # Original image
@@ -44,13 +38,9 @@ def visualize_steps(original, padded, shifted, dft):
     axs[0, 1].imshow(padded, cmap='gray')
     axs[0, 1].set_title('Padded Image (2M x 2N)')
 
-    # Shifted image
-    axs[1, 0].imshow(shifted, cmap='gray')
+    shifted_image_display = np.log(1 + np.abs(shifted))
+    axs[1, 0].imshow(shifted_image_display, cmap='gray')
     axs[1, 0].set_title('Shifted Image for Periodicity')
-
-    # Magnitude of DFT result
-    axs[1, 1].imshow(np.log(1 + np.abs(dft)), cmap='gray')  # Use log scale for better visibility
-    axs[1, 1].set_title('DFT Magnitude')
 
     for ax in axs.flat:
         ax.axis('off')
@@ -69,11 +59,8 @@ def main(image_path):
     # Step 3: Shift the image for periodicity
     shifted_image = shift_image_for_periodicity(padded_image)
 
-    # Step 4: Perform the DFT
-    dft_result = compute_dft(shifted_image)
-
     # Step 5: Visualize each step
-    visualize_steps(original_image, padded_image, shifted_image, dft_result)
+    visualize_steps(original_image, padded_image, shifted_image)
 
 # Example usage
 if len(sys.argv) != 2:
