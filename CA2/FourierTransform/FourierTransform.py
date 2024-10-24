@@ -11,15 +11,23 @@ def load_image(image_path):
 
 def pad_image(image):
     M, N = image.shape
-    padded_image = np.zeros((2 * M, 2 * N), dtype=np.complex128)  # Use complex type
-    padded_image[:M, :N] = image  # Copy the original image to the top-left corner
+    padded_image = np.zeros((2 * M, 2 * N), dtype=np.complex128)  # Initialize padded image
+    
+    for i in range(M):  # Iterate over rows
+        for j in range(N):  # Iterate over columns
+            padded_image[i, j] = image[i, j]  # Copy the original image pixel by pixel
+    
     return padded_image
 
 def shift_image_for_periodicity(image):
     M, N = image.shape
-    x, y = np.meshgrid(np.arange(M), np.arange(N), indexing='ij')
-    shift_factor = (-1) ** (x + y)
-    shifted_image = image * shift_factor  # Element-wise multiplication with shift factor
+    shifted_image = np.zeros_like(image, dtype=np.complex128)  # Initialize an empty array for the shifted image
+    
+    for i in range(M):  # Loop over each row
+        for j in range(N):  # Loop over each column
+            shift_factor = (-1) ** (i + j)  # Compute the shift factor for each element
+            shifted_image[i, j] = image[i, j] * shift_factor  # Apply the shift
+    
     return shifted_image
 
 def forward_fourier_transform(image):
@@ -54,7 +62,7 @@ def process_image(filename):
     plt.title("Original Image")
     
     plt.subplot(1, 3, 2)
-    plt.imshow(padded_image, cmap='gray')
+    plt.imshow(np.abs(padded_image), cmap='gray')
     plt.title("Padded Image")
     
     plt.subplot(1, 3, 3)
