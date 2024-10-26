@@ -11,22 +11,22 @@ def load_image(image_path):
 
 def pad_image(image):
     M, N = image.shape
-    padded_image = np.zeros((2 * M, 2 * N), dtype=np.complex128)  # Initialize padded image
+    padded_image = np.zeros((2 * M, 2 * N), dtype=np.complex128) 
     
-    for i in range(M):  # Iterate over rows
-        for j in range(N):  # Iterate over columns
-            padded_image[i, j] = image[i, j]  # Copy the original image pixel by pixel
+    for i in range(M): 
+        for j in range(N): 
+            padded_image[i, j] = image[i, j]  
     
     return padded_image
 
 def shift_image_for_periodicity(image):
     M, N = image.shape
-    shifted_image = np.zeros_like(image, dtype=np.complex128)  # Initialize an empty array for the shifted image
+    shifted_image = np.zeros_like(image, dtype=np.complex128) 
     
-    for i in range(M):  # Loop over each row
-        for j in range(N):  # Loop over each column
-            shift_factor = (-1) ** (i + j)  # Compute the shift factor for each element
-            shifted_image[i, j] = image[i, j] * shift_factor  # Apply the shift
+    for i in range(M):
+        for j in range(N): 
+            shift_factor = (-1) ** (i + j) 
+            shifted_image[i, j] = image[i, j] * shift_factor  
     
     return shifted_image
 

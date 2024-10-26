@@ -1,0 +1,30 @@
+Explanation and Expected Fourier Spectrum Analysis
+Constant Image:
+
+Expected Spectrum: Since the image has a single, uniform intensity, the Fourier transform should show a single bright spot at the origin (DC component) and no other frequencies.
+Observed Spectrum: We expect to see a single point in the center of the Fourier spectrum, with all other points dark.
+Single Frequency Pattern (Horizontal Sine Wave):
+
+Expected Spectrum: A single-frequency sine wave should produce two points symmetric about the center along the frequency axis corresponding to the wave’s orientation. For a horizontal sine wave, these points should be on the horizontal axis.
+Observed Spectrum: We expect two bright spots in the horizontal axis of the Fourier spectrum, showing the presence of a single dominant frequency.
+Grid Pattern (Checkerboard):
+
+Expected Spectrum: The grid pattern introduces both horizontal and vertical high frequencies, so we expect to see multiple bright spots along both axes, especially at higher frequencies (further from the center).
+Observed Spectrum: The Fourier spectrum should reveal bright points arranged symmetrically along both axes, indicating the high-frequency components of the grid.
+Random Noise:
+
+Expected Spectrum: Random noise contains all frequencies distributed uniformly, leading to a broad, dense spread in the Fourier spectrum without distinct patterns or symmetry.
+Observed Spectrum: We should see a “cloudy” appearance in the Fourier spectrum with random brightness throughout, representing the chaotic frequency components of noise.
+Radial Gradient:
+
+Expected Spectrum: A radial gradient contains low frequencies concentrated toward the center and fading outward, so we expect the Fourier spectrum to show a concentration of energy in the center with smooth falloff.
+Observed Spectrum: We expect a bright central area in the Fourier spectrum that gradually dims outward, reflecting the low-frequency nature of the radial gradient.
+Discussion of Results
+Each image's Fourier spectrum should closely match the expected pattern:
+
+Constant images should show only a central DC component, validating the lack of frequency content.
+Single-frequency patterns reveal the frequency as distinct spots along the axis of orientation.
+Grid patterns confirm the presence of both high-frequency horizontal and vertical components.
+Random noise appears as a uniform distribution in the spectrum, representing a mix of frequencies.
+Radial gradients confirm the low-frequency content, with brightness concentrated in the center.
+By comparing these spectra, we can understand how Fourier transforms capture different frequency characteristics in spatial patterns.
