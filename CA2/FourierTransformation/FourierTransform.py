@@ -7,94 +7,60 @@ def load_image(image_path):
     tifImg = TIFF.open(image_path)
     image = tifImg.read_image()
     tifImg.close()
-    return image
+    return image  
 
-def pad_image(image):
+def process_image(filename):
+    image = load_image(filename)
+    plt.figure(figsize=(10, 8))
+    plt.subplot(2, 3, 1)
+    plt.title("1. Original Image (MxN)")
+    plt.imshow(image, cmap='gray')
+
     M, N = image.shape
     padded_image = np.zeros((2 * M, 2 * N), dtype=np.complex128) 
-    
+
     for i in range(M): 
         for j in range(N): 
             padded_image[i, j] = image[i, j]  
-    
-    return padded_image
 
-def shift_image_for_periodicity(image):
-    M, N = image.shape
-    shifted_image = np.zeros_like(image, dtype=np.complex128) 
-    
-    for i in range(M):
-        for j in range(N): 
-            shift_factor = (-1) ** (i + j) 
-            shifted_image[i, j] = image[i, j] * shift_factor  
-    
-    return shifted_image
+    plt.subplot(2, 3, 2)
+    plt.title("2. Padded Image (2Mx2N)")
+    plt.imshow(np.abs(padded_image), cmap='gray')
 
-def forward_fourier_transform(image):
-    return np.fft.fft2(image)
+    x = np.arange(2 * M)
+    y = np.arange(2 * N)
+    X, Y = np.meshgrid(x, y, indexing='ij')
+    shifted_image = padded_image * ((-1) ** (X + Y))
 
-def inverse_fourier_transform(fft_image):
-    return np.fft.ifft2(fft_image) 
+    dimming_factor = 0.5
+    shifted_image_dimmer = shifted_image * dimming_factor
+    shifted_image_display = np.abs(shifted_image_dimmer)
 
-def apply_periodicity_to_real(ifft_image):
-    M, N = ifft_image.shape
-    x, y = np.meshgrid(np.arange(M), np.arange(N), indexing='ij')
-    shift_factor = (-1) ** (x + y)
-    real_part_shifted = np.real(ifft_image) * shift_factor
-    return real_part_shifted
+    plt.subplot(2, 3, 3)
+    plt.title("3. Shifted Image for Periodicity")
+    plt.imshow(shifted_image_display, cmap='gray', interpolation='nearest', vmax=255, vmin=0)
 
-def extract_upper_left_quadrant(image):
-    M, N = image.shape
-    return image[:M // 2, :N // 2]
+    dft_image = np.fft.fft2(shifted_image)
+    magnitude_spectrum = np.log(np.abs(dft_image) + 1)
 
-def process_image(filename):
-    original_image = load_image(filename)
-    
-    padded_image = pad_image(original_image)
-    
-    shifted_image = shift_image_for_periodicity(padded_image)
-    
-    # Plot original, padded, and shifted images
-    plt.figure(figsize=(15, 5))
-    
-    plt.subplot(1, 3, 1)
-    plt.imshow(original_image, cmap='gray', interpolation='nearest', vmax=255, vmin=0)
-    plt.title("Original Image")
-    
-    plt.subplot(1, 3, 2)
-    plt.imshow(np.abs(padded_image), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
-    plt.title("Padded Image")
-    
-    plt.subplot(1, 3, 3)
-    plt.imshow(np.abs(shifted_image), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
-    plt.title("Shifted Image")
-    
-    plt.tight_layout()
-    plt.show()
-    
-    fft_image = forward_fourier_transform(shifted_image)
-    
-    magnitude_spectrum = np.log(1 + np.abs(fft_image))
+    plt.subplot(2, 3, 4)
+    plt.title("4. DFT Magnitude Spectrum")
     plt.imshow(magnitude_spectrum, cmap='gray')
-    plt.title('Magnitude Spectrum of DFT')
-    plt.colorbar()
-    plt.show()
 
-    ifft_image = inverse_fourier_transform(fft_image)
-    real_part_shifted = apply_periodicity_to_real(ifft_image)
-    
-    upper_left_image = extract_upper_left_quadrant(real_part_shifted)
+    idft_image = np.fft.ifft2(dft_image)
+    shifted_idft_image = idft_image * ((-1) ** (X + Y))
 
-    plt.figure(figsize=(10, 5))
-    
-    plt.subplot(1, 2, 1)
-    plt.imshow(np.abs(real_part_shifted), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
-    plt.title("IDFT with Periodicity Shift")
-    
-    plt.subplot(1, 2, 2)
-    plt.imshow(np.abs(upper_left_image), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
-    plt.title("Upper-Left Quadrant of IDFT")
-    
+    plt.subplot(2, 3, 5)
+    plt.title("5. Inverse DFT (Shifted Back)")
+    plt.imshow(np.abs(shifted_idft_image), cmap='gray')
+
+    final_image = np.abs(shifted_idft_image[:M, :N])
+
+    plt.subplot(2, 3, 6)
+    plt.title("6. Cropped Final Image")
+    plt.imshow(final_image, cmap='gray')
+
+    plt.tight_layout()
     plt.show()
 
 if len(sys.argv) != 2:
