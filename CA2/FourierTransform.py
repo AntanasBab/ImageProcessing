@@ -58,15 +58,15 @@ def process_image(filename):
     plt.figure(figsize=(15, 5))
     
     plt.subplot(1, 3, 1)
-    plt.imshow(original_image, cmap='gray')
+    plt.imshow(original_image, cmap='gray', interpolation='nearest', vmax=255, vmin=0)
     plt.title("Original Image")
     
     plt.subplot(1, 3, 2)
-    plt.imshow(np.abs(padded_image), cmap='gray')
+    plt.imshow(np.abs(padded_image), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
     plt.title("Padded Image")
     
     plt.subplot(1, 3, 3)
-    plt.imshow(np.abs(shifted_image), cmap='gray')
+    plt.imshow(np.abs(shifted_image), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
     plt.title("Shifted Image")
     
     plt.tight_layout()
@@ -88,11 +88,11 @@ def process_image(filename):
     plt.figure(figsize=(10, 5))
     
     plt.subplot(1, 2, 1)
-    plt.imshow(np.abs(real_part_shifted), cmap='gray')
+    plt.imshow(np.abs(real_part_shifted), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
     plt.title("IDFT with Periodicity Shift")
     
     plt.subplot(1, 2, 2)
-    plt.imshow(np.abs(upper_left_image), cmap='gray')
+    plt.imshow(np.abs(upper_left_image), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
     plt.title("Upper-Left Quadrant of IDFT")
     
     plt.show()
