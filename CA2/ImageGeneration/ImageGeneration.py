@@ -30,19 +30,28 @@ def generate_grid_pattern(size=256, freq_x=10, freq_y=10):
     
     pattern = (np.cos(2 * np.pi * freq_x * X / size) + 
                np.cos(2 * np.pi * freq_y * Y / size))
-    return (pattern - pattern.min()) / (pattern.max() - pattern.min()) 
+    
+    # Normalize
+    return (pattern - pattern.min()) / (pattern.max() - pattern.min())
 
-def generate_circular_pattern(size=256, num_circles=10):
+def generate_pyramid_shape(size=256):
     pattern = np.zeros((size, size))
-    center = size // 2
-    
-    for i in range(1, num_circles + 1):
-        radius = i * (size // (2 * num_circles))
-        y, x = np.ogrid[-center:size - center, -center:size - center]
-        mask = x**2 + y**2 <= radius**2
-        
-        pattern[mask] = i / num_circles 
-    
+    height = size // 2
+    width = size // 4
+    center_x = size // 2
+    center_y = size // 2
+
+    for y in range(height):
+        for x in range(width):
+            if (y >= height // 2 and x < width - 1 - y // 2):
+                pattern[center_y - height // 2 + y, center_x - width // 2 + x] = 1
+            
+            if (y >= height // 2 and x < width - 1 - y // 2):
+                pattern[center_y - height // 2 + y, center_x + width // 2 - x] = 1
+            
+            if (y == height // 2 and x < width):
+                pattern[center_y - height // 2 + y, center_x - width // 2 + x] = 1
+
     return pattern
 
 def display_pattern_and_dft(pattern, pattern_name):
@@ -79,6 +88,6 @@ if __name__ == "__main__":
     grid_pattern = generate_grid_pattern(size=256, freq_x=10, freq_y=10)
     display_pattern_and_dft(grid_pattern, "Grid Pattern")
 
-    # Circle
-    circular_pattern = generate_circular_pattern(size=256, num_circles=10)
-    display_pattern_and_dft(circular_pattern, "Circular Pattern")
+    # Pyramid
+    pyramid_pattern = generate_pyramid_shape(size=256)
+    display_pattern_and_dft(pyramid_pattern, "Pyramid pattern")

@@ -14,7 +14,7 @@ def process_image(filename):
     plt.figure(figsize=(10, 8))
     plt.subplot(2, 3, 1)
     plt.title("1. Original Image (MxN)")
-    plt.imshow(image, cmap='gray')
+    plt.imshow(image, cmap='gray', interpolation='nearest', vmax=255, vmin=0)
 
     M, N = image.shape
     padded_image = np.zeros((2 * M, 2 * N), dtype=np.complex128) 
@@ -25,7 +25,7 @@ def process_image(filename):
 
     plt.subplot(2, 3, 2)
     plt.title("2. Padded Image (2Mx2N)")
-    plt.imshow(np.abs(padded_image), cmap='gray')
+    plt.imshow(np.abs(padded_image), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
 
     x = np.arange(2 * M)
     y = np.arange(2 * N)
@@ -52,13 +52,13 @@ def process_image(filename):
 
     plt.subplot(2, 3, 5)
     plt.title("5. Inverse DFT (Shifted Back)")
-    plt.imshow(np.abs(shifted_idft_image), cmap='gray')
+    plt.imshow(np.abs(shifted_idft_image), cmap='gray', interpolation='nearest', vmax=255, vmin=0)
 
     final_image = np.abs(shifted_idft_image[:M, :N])
 
     plt.subplot(2, 3, 6)
     plt.title("6. Cropped Final Image")
-    plt.imshow(final_image, cmap='gray')
+    plt.imshow(final_image, cmap='gray', interpolation='nearest', vmax=255, vmin=0)
 
     plt.tight_layout()
     plt.show()
