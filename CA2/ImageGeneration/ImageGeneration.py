@@ -73,16 +73,16 @@ def display_pattern_and_dft(pattern, pattern_name):
 
 if __name__ == "__main__":
     # Random points
-    sparse_points_pattern = generate_sparse_points(size=256, num_points=5)
+    sparse_points_pattern = generate_sparse_points(size=256, num_points=10)
     display_pattern_and_dft(sparse_points_pattern, "Sparse Points")
 
     # Sin (Horizontal)
     sinusoidal_pattern_h = generate_sinusoidal_pattern(size=256, freq=15, angle=0)
-    display_pattern_and_dft(sinusoidal_pattern_h, "High-Frequency Sinusoidal Waves (Horizontal)")
+    display_pattern_and_dft(sinusoidal_pattern_h, "High-Frequency Sinusoidal Waves (Vertical)")
 
     # Sin (Vertical)
     sinusoidal_pattern_v = generate_sinusoidal_pattern(size=256, freq=15, angle=np.pi / 2)
-    display_pattern_and_dft(sinusoidal_pattern_v, "High-Frequency Sinusoidal Waves (Vertical)")
+    display_pattern_and_dft(sinusoidal_pattern_v, "High-Frequency Sinusoidal Waves (Horizontal)")
 
     # Grid
     grid_pattern = generate_grid_pattern(size=256, freq_x=10, freq_y=10)
