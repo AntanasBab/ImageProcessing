@@ -1,4 +1,4 @@
-from FourierTransform import *
+from CA2.FourierTransformation.FourierTransform import *
 import sys
 import numpy as np
 import libtiff
