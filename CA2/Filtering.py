@@ -1,8 +1,7 @@
-from CA2.FourierTransformation.FourierTransform import *
 import numpy as np
 import matplotlib.pyplot as plt
-from libtiff import TIFF
 import sys
+from FourierTransformation.FourierTransform import *
 
 def ideal_filter(shape, cutoff, high_pass=False):
     M, N = shape
@@ -37,22 +36,21 @@ def apply_filter(dft_image, filter_mask):
 def process_image(filename):
     image = load_image(filename)
     plt.figure(figsize=(15, 10))
-    plt.subplot(3, 4, 1)
+    plt.subplot(3, 3, 1)
     plt.title("1. Original Image (MxN)")
     plt.imshow(image, cmap='gray', interpolation='nearest', vmax=255, vmin=0)
 
     M, N = image.shape
-    padded_image = np.zeros((2 * M, 2 * N), dtype=np.complex128)
-    padded_image[:M, :N] = image
+    padded_image = pad_image(image, M, N)
 
-    dft_image = np.fft.fftshift(np.fft.fft2(padded_image))
+    X, Y, shifted_image = shift_image(padded_image, M, N)
+    dft_image = fourier_transform(shifted_image)
     magnitude_spectrum = np.log(np.abs(dft_image) + 1)
 
-    plt.subplot(3, 4, 2)
+    plt.subplot(3, 3, 2)
     plt.title("2. DFT Magnitude Spectrum")
     plt.imshow(magnitude_spectrum, cmap='gray')
 
-    # Filters
     cutoff = 50
     ideal_low_pass = ideal_filter(dft_image.shape, cutoff, high_pass=False)
     ideal_high_pass = ideal_filter(dft_image.shape, cutoff, high_pass=True)
@@ -70,23 +68,23 @@ def process_image(filename):
         ("Gaussian High-Pass", gaussian_high_pass),
     ]
 
-    # Apply filters and display results
     for i, (title, filter_mask) in enumerate(filters, start=3):
         filtered_dft = apply_filter(dft_image, filter_mask)
         filtered_image = np.fft.ifft2(np.fft.ifftshift(filtered_dft))
         final_image = np.abs(filtered_image[:M, :N])
 
-        plt.subplot(3, 4, i)
+        plt.subplot(3, 3, i)
         plt.title(title)
         plt.imshow(final_image, cmap='gray', interpolation='nearest', vmax=255, vmin=0)
 
     plt.tight_layout()
     plt.show()
 
-if len(sys.argv) != 2:
-    print("Usage: python FourierTransform.py <image_path>")
-    sys.exit(1)
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python FourierTransform.py <image_path>")
+        sys.exit(1)
 
-image_path = sys.argv[1]
-process_image(image_path)
+    image_path = sys.argv[1]
+    process_image(image_path)
 

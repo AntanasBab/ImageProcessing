@@ -84,9 +84,10 @@ def process_image(filename):
     plt.tight_layout()
     plt.show()
 
-if len(sys.argv) != 2:
-    print("Usage: python FourierTransform.py <image_path>")
-    sys.exit(1)
+if __name__ == "__main__":
+    if len(sys.argv) != 2:
+        print("Usage: python FourierTransform.py <image_path>")
+        sys.exit(1)
 
-image_path = sys.argv[1]
-process_image(image_path)
+    image_path = sys.argv[1]
+    process_image(image_path)
