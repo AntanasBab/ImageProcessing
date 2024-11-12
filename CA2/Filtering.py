@@ -60,12 +60,12 @@ def process_image(filename):
     gaussian_high_pass = gaussian_filter(dft_image.shape, cutoff, high_pass=True)
 
     filters = [
-        ("Ideal Low-Pass", ideal_low_pass),
-        ("Ideal High-Pass", ideal_high_pass),
-        ("Butterworth Low-Pass", butterworth_low_pass),
-        ("Butterworth High-Pass", butterworth_high_pass),
-        ("Gaussian Low-Pass", gaussian_low_pass),
-        ("Gaussian High-Pass", gaussian_high_pass),
+        ("Ideal low-pass", ideal_low_pass),
+        ("Ideal high-pass", ideal_high_pass),
+        ("Butterworth low-pass", butterworth_low_pass),
+        ("Butterworth high-pass", butterworth_high_pass),
+        ("Gaussian low-pass", gaussian_low_pass),
+        ("Gaussian high-pass", gaussian_high_pass),
     ]
 
     for i, (title, filter_mask) in enumerate(filters, start=3):
