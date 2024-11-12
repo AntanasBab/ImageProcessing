@@ -36,22 +36,22 @@ def apply_filter(dft_image, filter_mask):
 def process_image(filename):
     image = load_image(filename)
     plt.figure(figsize=(15, 10))
-    plt.subplot(3, 3, 1)
+    plt.subplot(2, 4, 1)
     plt.title("1. Original Image (MxN)")
     plt.imshow(image, cmap='gray', interpolation='nearest', vmax=255, vmin=0)
 
     M, N = image.shape
     padded_image = pad_image(image, M, N)
 
-    X, Y, shifted_image = shift_image(padded_image, M, N)
+    _, _, shifted_image = shift_image(padded_image, M, N)
     dft_image = fourier_transform(shifted_image)
     magnitude_spectrum = np.log(np.abs(dft_image) + 1)
 
-    plt.subplot(3, 3, 2)
+    plt.subplot(2, 4, 2)
     plt.title("2. DFT Magnitude Spectrum")
     plt.imshow(magnitude_spectrum, cmap='gray')
 
-    cutoff = 50
+    cutoff = float(sys.argv[1])
     ideal_low_pass = ideal_filter(dft_image.shape, cutoff, high_pass=False)
     ideal_high_pass = ideal_filter(dft_image.shape, cutoff, high_pass=True)
     butterworth_low_pass = butterworth_filter(dft_image.shape, cutoff, order=2, high_pass=False)
@@ -70,10 +70,10 @@ def process_image(filename):
 
     for i, (title, filter_mask) in enumerate(filters, start=3):
         filtered_dft = apply_filter(dft_image, filter_mask)
-        filtered_image = np.fft.ifft2(np.fft.ifftshift(filtered_dft))
+        filtered_image = inverse_fourier_transform(unshift_image(filtered_dft, M, N))
         final_image = np.abs(filtered_image[:M, :N])
 
-        plt.subplot(3, 3, i)
+        plt.subplot(2, 4, i)
         plt.title(title)
         plt.imshow(final_image, cmap='gray', interpolation='nearest', vmax=255, vmin=0)
 
@@ -81,10 +81,10 @@ def process_image(filename):
     plt.show()
 
 if __name__ == "__main__":
-    if len(sys.argv) != 2:
-        print("Usage: python FourierTransform.py <image_path>")
+    if len(sys.argv) != 3:
+        print("Usage: python FourierTransform.py <cutoff_constant> <image_path>")
         sys.exit(1)
 
-    image_path = sys.argv[1]
+    image_path = sys.argv[2]
     process_image(image_path)
 
