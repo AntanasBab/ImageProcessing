@@ -11,7 +11,7 @@ def show_fft(image):
     plt.show()
     return fft_image
 
-def notch_filter(shape, notch_coords, radius=10):
+def notch_filter(shape, notch_coords, radius=20):
     mask = np.ones(shape, dtype=np.float32)
     for x, y in notch_coords:
         cv, cu = np.ogrid[:shape[0], :shape[1]]
@@ -34,6 +34,7 @@ def apply_filter(image, filter_mask):
     filtered_image = np.abs(np.fft.ifft2(np.fft.ifftshift(filtered_fft)))
     return filtered_image
 
+
 if __name__ == "__main__":
     if len(sys.argv) != 3:
         print("Usage: python3 NoiseRemoval.py <original_image_path> <noisy_image_path>")
@@ -41,14 +42,15 @@ if __name__ == "__main__":
 
     original_img = load_image(sys.argv[1])
     noisy1 = load_image(sys.argv[2])
+    M,N = noisy1.shape
 
     fft_noisy1 = show_fft(noisy1)
 
-    notch_coords = [(100, 120), (140, 160)]
+    notch_coords = [(121, 119),  (M-121, N-119)]
     notch_mask = notch_filter(noisy1.shape, notch_coords)
     filtered_notch1 = apply_filter(noisy1, notch_mask)
 
-    band_mask = bandpass_filter(noisy1.shape, 0, 200)
+    band_mask = bandpass_filter(noisy1.shape, 0, 180)
     filtered_band1 = apply_filter(noisy1, band_mask)
 
     plt.figure(figsize=(10, 10))
