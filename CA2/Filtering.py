@@ -82,7 +82,7 @@ def process_image(filename):
 
 if __name__ == "__main__":
     if len(sys.argv) != 3:
-        print("Usage: python FourierTransform.py <cutoff_constant> <image_path>")
+        print("Usage: python3 FourierTransform.py <cutoff_constant> <image_path>")
         sys.exit(1)
 
     image_path = sys.argv[2]
