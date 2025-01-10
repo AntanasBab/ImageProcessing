@@ -75,26 +75,77 @@ def otsu_threshold(image):
 def threshold_image(image, threshold):
     return (image > threshold).astype(np.uint8)
 
-# Find connected components using a simple flood-fill algorithm
-def find_connected_components(binary_image):
-    labels = np.zeros_like(binary_image, dtype=np.int32)
-    label = 0
-    stack = []
-    for i in range(binary_image.shape[0]):
-        for j in range(binary_image.shape[1]):
-            if binary_image[i, j] == 1 and labels[i, j] == 0:
-                label += 1
-                stack.append((i, j))
-                while stack:
-                    x, y = stack.pop()
-                    if labels[x, y] == 0:
-                        labels[x, y] = label
-                        for dx, dy in [(-1, 0), (1, 0), (0, -1), (0, 1)]:
-                            nx, ny = x + dx, y + dy
-                            if 0 <= nx < binary_image.shape[0] and 0 <= ny < binary_image.shape[1]:
-                                if binary_image[nx, ny] == 1 and labels[nx, ny] == 0:
-                                    stack.append((nx, ny))
-    return labels, label
+# Connected-component labeling (two-pass algorithm)
+def connected_component_labeling(binary_image):
+    """
+    Perform connected-component labeling using a two-pass algorithm.
+    Supports 8-connectivity.
+    
+    :param binary_image: Input binary image (2D numpy array).
+    :return: Labeled image (2D numpy array) and number of labels.
+    """
+    rows, cols = binary_image.shape
+    labels = np.zeros((rows, cols), dtype=np.int32)
+    label = 1
+    equivalences = {}
+
+    # First pass: Assign provisional labels and track equivalences
+    for i in range(rows):
+        for j in range(cols):
+            if binary_image[i, j] == 1:
+                neighbors = []
+
+                # Check 8-connected neighbors
+                for di, dj in [(-1, -1), (-1, 0), (-1, 1), (0, -1)]:
+                    ni, nj = i + di, j + dj
+                    if 0 <= ni < rows and 0 <= nj < cols and labels[ni, nj] > 0:
+                        neighbors.append(labels[ni, nj])
+
+                if not neighbors:
+                    # Assign new label if no neighbors
+                    labels[i, j] = label
+                    equivalences[label] = label
+                    label += 1
+                else:
+                    # Assign the smallest label among neighbors
+                    min_label = min(neighbors)
+                    labels[i, j] = min_label
+
+                    # Update equivalence table
+                    for neighbor_label in neighbors:
+                        if neighbor_label != min_label:
+                            equivalences[max(min_label, neighbor_label)] = min(min_label, neighbor_label)
+
+    # Resolve equivalences
+    for key in sorted(equivalences.keys(), reverse=True):
+        root = equivalences[key]
+        while root != equivalences[root]:
+            root = equivalences[root]
+        equivalences[key] = root
+
+    # Second pass: Relabel pixels with resolved labels
+    resolved_labels = np.zeros_like(labels)
+    new_label = 1
+    label_map = {}
+
+    for i in range(rows):
+        for j in range(cols):
+            if labels[i, j] > 0:
+                resolved_label = equivalences[labels[i, j]]
+                if resolved_label not in label_map:
+                    label_map[resolved_label] = new_label
+                    new_label += 1
+                resolved_labels[i, j] = label_map[resolved_label]
+
+    return resolved_labels, new_label - 1
+
+def find_root(equivalence, label):
+    """
+    Find the root label for a given label.
+    """
+    while equivalence[label] != label:
+        label = equivalence[label]
+    return label
 
 # Count signals within a region
 def count_signals(region_mask, intensity_image, threshold):
@@ -131,6 +182,7 @@ def analyze_images_with_smoothing(acridine_file, fitc_file, dapi_file):
     fitc = load_tif_image(fitc_file)
     dapi = load_tif_image(dapi_file)
     
+    # Display original RGB image
     rgb_image_original = np.stack([acridine, fitc, dapi], axis=-1)
     rgb_image_original = rgb_image_original / np.max(rgb_image_original)  # Normalize for visualization
     plt.imshow(rgb_image_original)
@@ -143,7 +195,7 @@ def analyze_images_with_smoothing(acridine_file, fitc_file, dapi_file):
     # Apply averaging filter to images
     dapi_smoothed = apply_averaging_filter(dapi, kernel)
     
-    # Create RGB image for visualization
+    # Display smoothed RGB image
     rgb_image = np.stack([acridine, fitc, dapi_smoothed], axis=-1)
     rgb_image = rgb_image / np.max(rgb_image)  # Normalize for visualization
     plt.imshow(rgb_image)
@@ -160,8 +212,8 @@ def analyze_images_with_smoothing(acridine_file, fitc_file, dapi_file):
     plt.title("Thresholded DAPI Image (Binary, Smoothed)")
     plt.show()
     
-    # Find connected components
-    labels, num_labels = find_connected_components(dapi_binary)
+    # Perform connected-component labeling
+    labels, num_labels = connected_component_labeling(dapi_binary)
     
     # Plot labeled cells with indices
     plot_labeled_image(labels, num_labels)
