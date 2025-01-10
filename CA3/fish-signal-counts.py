@@ -3,29 +3,17 @@ from matplotlib import pyplot as plt
 import numpy as np
 import sys
 
-# Load the .tif images
 def load_tif_image(filename):
     tif = TIFF.open(filename, mode='r')
     image = tif.read_image()
     return np.array(image, dtype=np.float32)
 
-# Create an averaging filter (mean filter)
 def averaging_kernel(size):
-    """
-    Generate a 2D averaging kernel.
-    :param size: Size of the kernel (must be odd).
-    """
     kernel = np.ones((size, size), dtype=np.float32)
     kernel /= np.sum(kernel)
     return kernel
 
-# Convolution with averaging kernel
 def apply_averaging_filter(image, kernel):
-    """
-    Apply an averaging filter to an image.
-    :param image: Input 2D image.
-    :param kernel: 2D averaging kernel.
-    """
     padded_image = np.pad(image, kernel.shape[0] // 2, mode='reflect')
     smoothed_image = np.zeros_like(image)
     k = kernel.shape[0] // 2
@@ -242,7 +230,7 @@ def analyze_images_with_smoothing(acridine_file, fitc_file, dapi_file):
     return results
 
 if __name__ == "__main__":
-    if len(sys.argv) < 4:
+    if len(sys.argv) != 4:
         print("Usage: python3 fish-signal-counts.py <acridine_file_path> <dapi_file_path> <fitc_file_path>")
         sys.exit(1)
 
