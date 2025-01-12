@@ -1,29 +1,8 @@
-from libtiff import TIFF
 from matplotlib import pyplot as plt
 import numpy as np
 import sys
-
-def load_tif_image(filename):
-    tif = TIFF.open(filename, mode='r')
-    image = tif.read_image()
-    return np.array(image, dtype=np.float32)
-
-def averaging_kernel(size):
-    kernel = np.ones((size, size), dtype=np.float32)
-    kernel /= np.sum(kernel)
-    return kernel
-
-def apply_averaging_filter(image, kernel):
-    padded_image = np.pad(image, kernel.shape[0] // 2, mode='reflect')
-    smoothed_image = np.zeros_like(image)
-    k = kernel.shape[0] // 2
-    
-    for i in range(image.shape[0]):
-        for j in range(image.shape[1]):
-            region = padded_image[i:i + kernel.shape[0], j:j + kernel.shape[1]]
-            smoothed_image[i, j] = np.sum(region * kernel)
-    
-    return smoothed_image
+from common.avgFilter import apply_averaging_filter, averaging_kernel
+from common.loadImage import load_tif_image
 
 def otsu_threshold(image):
     pixel_counts = np.bincount(image.astype(int).flatten(), minlength=256)
