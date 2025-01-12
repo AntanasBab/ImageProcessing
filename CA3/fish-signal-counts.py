@@ -25,11 +25,7 @@ def apply_averaging_filter(image, kernel):
     
     return smoothed_image
 
-# Otsu's thresholding
 def otsu_threshold(image):
-    """
-    Compute Otsu's threshold for a given grayscale image.
-    """
     pixel_counts = np.bincount(image.astype(int).flatten(), minlength=256)
     total_pixels = np.sum(pixel_counts)
     total_sum = np.sum(np.arange(256) * pixel_counts)
@@ -50,7 +46,7 @@ def otsu_threshold(image):
         mean_background = sum_background / weight_background
         mean_foreground = (total_sum - sum_background) / weight_foreground
         
-        # Calculate between-class variance
+        # Calculate between class variance
         variance_between = weight_background * weight_foreground * (mean_background - mean_foreground) ** 2
         
         if variance_between > max_variance:
@@ -59,43 +55,31 @@ def otsu_threshold(image):
     
     return threshold
 
-# Thresholding function
 def threshold_image(image, threshold):
     return (image > threshold).astype(np.uint8)
 
-# Connected-component labeling (two-pass algorithm)
 def connected_component_labeling(binary_image):
-    """
-    Perform connected-component labeling using a two-pass algorithm.
-    Supports 8-connectivity.
-    
-    :param binary_image: Input binary image (2D numpy array).
-    :return: Labeled image (2D numpy array) and number of labels.
-    """
     rows, cols = binary_image.shape
     labels = np.zeros((rows, cols), dtype=np.int32)
     label = 1
     equivalences = {}
 
-    # First pass: Assign provisional labels and track equivalences
+    # First pass: assign provisional labels and track equivalences
     for i in range(rows):
         for j in range(cols):
             if binary_image[i, j] == 1:
                 neighbors = []
 
-                # Check 8-connected neighbors
                 for di, dj in [(-1, -1), (-1, 0), (-1, 1), (0, -1)]:
                     ni, nj = i + di, j + dj
                     if 0 <= ni < rows and 0 <= nj < cols and labels[ni, nj] > 0:
                         neighbors.append(labels[ni, nj])
 
                 if not neighbors:
-                    # Assign new label if no neighbors
                     labels[i, j] = label
                     equivalences[label] = label
                     label += 1
                 else:
-                    # Assign the smallest label among neighbors
                     min_label = min(neighbors)
                     labels[i, j] = min_label
 
@@ -111,7 +95,7 @@ def connected_component_labeling(binary_image):
             root = equivalences[root]
         equivalences[key] = root
 
-    # Second pass: Relabel pixels with resolved labels
+    # Second pass: relabel pixels with resolved labels
     resolved_labels = np.zeros_like(labels)
     new_label = 1
     label_map = {}
@@ -128,93 +112,69 @@ def connected_component_labeling(binary_image):
     return resolved_labels, new_label - 1
 
 def find_root(equivalence, label):
-    """
-    Find the root label for a given label.
-    """
     while equivalence[label] != label:
         label = equivalence[label]
     return label
 
-# Count signals within a region
-def count_signals(region_mask, intensity_image, threshold):
+def count_signals(region_mask, intensity_image, threshold=0):
     return np.sum(intensity_image[region_mask] > threshold)
 
 def plot_labeled_image(labels, num_labels):
-    """
-    Plot the labeled image with cell indices, avoiding black color for the background.
-    """
     plt.figure(figsize=(10, 8))
     labeled_image = np.zeros_like(labels, dtype=np.float32)
     
-    # Assign unique values to each label
     for label in range(1, num_labels + 1):
         labeled_image[labels == label] = label
     
-    # Create a custom colormap that keeps the background black
+    # Create a custom colormap for indexes
     from matplotlib.colors import ListedColormap
     cmap = plt.cm.nipy_spectral
     cmap_colors = cmap(np.linspace(0, 1, num_labels + 1))
-    cmap_colors[0] = [0, 0, 0, 1.0]  # Background (label 0) is black
+    cmap_colors[0] = [0, 0, 0, 1.0]
     custom_cmap = ListedColormap(cmap_colors)
     
-    # Plot the labeled image
     plt.imshow(labeled_image, cmap=custom_cmap)
     plt.colorbar(ticks=np.arange(num_labels + 1), label="Cell Index")
     plt.title("Labeled Cells with Indices")
     plt.show()
 
-# Main analysis function
-def analyze_images_with_smoothing(acridine_file, fitc_file, dapi_file):
-    # Load images
+def analyze_images(acridine_file, fitc_file, dapi_file):
     acridine = load_tif_image(acridine_file)
     fitc = load_tif_image(fitc_file)
     dapi = load_tif_image(dapi_file)
     
-    # Display original RGB image
     rgb_image_original = np.stack([acridine, fitc, dapi], axis=-1)
     rgb_image_original = rgb_image_original / np.max(rgb_image_original)  # Normalize for visualization
     plt.imshow(rgb_image_original)
     plt.title("Original RGB Image (Acridine=Red, FITC=Green, DAPI=Blue)")
     plt.show()
 
-    # Create averaging kernel for smoothing
-    kernel = averaging_kernel(size=5)  # 5x5 averaging filter
+    kernel = averaging_kernel(size=5)
     
-    # Apply averaging filter to images
     dapi_smoothed = apply_averaging_filter(dapi, kernel)
     
-    # Display smoothed RGB image
     rgb_image = np.stack([acridine, fitc, dapi_smoothed], axis=-1)
     rgb_image = rgb_image / np.max(rgb_image)  # Normalize for visualization
     plt.imshow(rgb_image)
     plt.title("Smoothed RGB Image (Acridine=Red, FITC=Green, DAPI=Blue)")
     plt.show()
     
-    # Apply Otsu's thresholding to segment DAPI cells
     dapi_threshold = otsu_threshold(dapi_smoothed)
     dapi_binary = threshold_image(dapi_smoothed, dapi_threshold)
     
-    # Plot thresholded DAPI binary image
     plt.figure()
     plt.imshow(dapi_binary, cmap='gray')
     plt.title("Thresholded DAPI Image (Binary, Smoothed)")
     plt.show()
     
-    # Perform connected-component labeling
     labels, num_labels = connected_component_labeling(dapi_binary)
-    
-    # Plot labeled cells with indices
     plot_labeled_image(labels, num_labels)
     
-    # Analyze each cell
     results = []
-    acridine_threshold = otsu_threshold(acridine)
-    fitc_threshold = otsu_threshold(fitc)
-    
     for label in range(1, num_labels + 1):
         cell_mask = labels == label
-        acridine_count = count_signals(cell_mask, acridine, acridine_threshold)
-        fitc_count = count_signals(cell_mask, fitc, fitc_threshold)
+        acridine_count = count_signals(cell_mask, acridine)
+        fitc_count = count_signals(cell_mask, fitc)
         ratio = acridine_count / fitc_count if fitc_count > 0 else 0
         results.append({
             "Cell ID": label,
@@ -223,7 +183,7 @@ def analyze_images_with_smoothing(acridine_file, fitc_file, dapi_file):
             "Acredine/FITC Ratio": ratio
         })
     
-    # Print results
+    # Results
     print("Cell Analysis Results:")
     for result in results:
         print(f"Cell {result['Cell ID']}: Acredine={result['Acredine Count']}, FITC={result['FITC Count']}, Ratio={result['Acredine/FITC Ratio']:.2f}")
@@ -234,5 +194,4 @@ if __name__ == "__main__":
         print("Usage: python3 fish-signal-counts.py <acridine_file_path> <dapi_file_path> <fitc_file_path>")
         sys.exit(1)
 
-    # Run the analysis
-    analyze_images_with_smoothing(sys.argv[1], sys.argv[3], sys.argv[2])
+    analyze_images(sys.argv[1], sys.argv[3], sys.argv[2])
