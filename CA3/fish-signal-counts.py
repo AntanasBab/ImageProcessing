@@ -3,39 +3,7 @@ import numpy as np
 import sys
 from common.avgFilter import apply_averaging_filter, averaging_kernel
 from common.loadImage import load_tif_image
-
-def otsu_threshold(image):
-    pixel_counts = np.bincount(image.astype(int).flatten(), minlength=256)
-    total_pixels = np.sum(pixel_counts)
-    total_sum = np.sum(np.arange(256) * pixel_counts)
-    
-    max_variance = 0
-    threshold = 0
-    weight_background = 0
-    sum_background = 0
-    
-    for t in range(256):
-        weight_background += pixel_counts[t]
-        weight_foreground = total_pixels - weight_background
-        
-        if weight_background == 0 or weight_foreground == 0:
-            continue
-        
-        sum_background += t * pixel_counts[t]
-        mean_background = sum_background / weight_background
-        mean_foreground = (total_sum - sum_background) / weight_foreground
-        
-        # Calculate between class variance
-        variance_between = weight_background * weight_foreground * (mean_background - mean_foreground) ** 2
-        
-        if variance_between > max_variance:
-            max_variance = variance_between
-            threshold = t
-    
-    return threshold
-
-def threshold_image(image, threshold):
-    return (image > threshold).astype(np.uint8)
+from common.otsuThreshold import otsu_threshold, threshold_image
 
 def connected_component_labeling(binary_image):
     rows, cols = binary_image.shape

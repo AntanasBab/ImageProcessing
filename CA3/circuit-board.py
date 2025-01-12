@@ -1,21 +1,8 @@
 import sys
 from common.loadImage import load_tif_image
+from common.medianFilter import median_filter
+from common.otsuThreshold import apply_dual_otsu_threshold, otsu_threshold, threshold_image
 from matplotlib import pyplot as plt
-import numpy as np
-
-def median_filter(image, kernel_size=3):
-    pad_size = kernel_size // 2
-    padded_image = np.pad(image, pad_size, mode='edge')
-
-    denoised_image = np.zeros_like(image)
-
-    for i in range(image.shape[0]):
-        for j in range(image.shape[1]):
-            kernel_window = padded_image[i:i + kernel_size, j:j + kernel_size]
-            denoised_image[i, j] = np.median(kernel_window)
-
-    return denoised_image
-
 
 def analyze_image(circuit_board_file):
     curcuit_board_image = load_tif_image(circuit_board_file)
@@ -24,11 +11,30 @@ def analyze_image(circuit_board_file):
     plt.title("Original Curcuit Board Image")
     plt.show()
 
-    curcuit_board_smoothed = median_filter(curcuit_board_image, 3)
+    curcuit_board_filtered = median_filter(curcuit_board_image, 3)
     
-    plt.imshow(curcuit_board_smoothed, cmap="gray", interpolation="nearest", vmin=0, vmax=255)
-    plt.title("Smoothed Curcuit Board Image")
+    plt.imshow(curcuit_board_filtered, cmap="gray", interpolation="nearest", vmin=0, vmax=255)
+    plt.title("Filtered Curcuit Board Image")
     plt.show()
+
+    curcuit_board_threshold = otsu_threshold(curcuit_board_filtered)
+    curcuit_board_binary = threshold_image(curcuit_board_filtered, curcuit_board_threshold)
+
+    curcuit_board_binary2, _, _ = apply_dual_otsu_threshold(curcuit_board_filtered)
+
+    plt.figure(figsize=(12, 6))
+
+    plt.subplot(1, 2, 1)
+    plt.imshow(curcuit_board_binary, cmap='gray')
+    plt.title("Otsu Thresholded Circuit Board Image")
+    plt.axis('off')  # Turn off axis for better visual appeal
+
+    plt.subplot(1, 2, 2)
+    plt.imshow(curcuit_board_binary2, cmap='gray')
+    plt.title("Dual Thresholded Circuit Board Image")
+    plt.axis('off')
+    plt.show()
+    
 
 if __name__ == "__main__":
     if len(sys.argv) != 2:
