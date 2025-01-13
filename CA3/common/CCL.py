@@ -61,7 +61,7 @@ def plot_labeled_image(labels, num_labels):
     for label in range(1, num_labels + 1):
         labeled_image[labels == label] = label
     
-    # Create a custom colormap for indexes
+    # Custom colormap for indexes
     from matplotlib.colors import ListedColormap
     cmap = plt.cm.nipy_spectral
     cmap_colors = cmap(np.linspace(0, 1, num_labels + 1))
