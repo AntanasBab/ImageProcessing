@@ -147,17 +147,17 @@ if __name__ == "__main__":
         axs[0, 3].set_title("Whole Bottles Image")
         axs[0, 3].axis('off')
 
-        axs[1, 0].imshow(labeled_image, cmap="gray")
-        axs[1, 0].set_title("Labelled Bottles Image")
+        axs[1, 0].imshow(sobel_edges, cmap="gray")
+        axs[1, 0].set_title("Sobel Edges Image")
         axs[1, 0].axis('off')
 
         axs[1, 1].imshow(sobel_edges, cmap="gray")
-        axs[1, 1].set_title("Sobel Edges Image")
+        axs[1, 1].axhline(y=bottleneck_top_row, color='r', linestyle='-', linewidth=1, label="Bottleneck Top (Red)")
+        axs[1, 1].set_title("Sobel Edges with Bottleneck Line")
         axs[1, 1].axis('off')
 
-        axs[1, 2].imshow(sobel_edges, cmap="gray")
-        axs[1, 2].axhline(y=bottleneck_top_row, color='r', linestyle='-', linewidth=2, label="Bottleneck Top (Red)")
-        axs[1, 2].set_title("Sobel Edges with Bottleneck Line")
+        axs[1, 2].imshow(labeled_image, cmap="gray")
+        axs[1, 2].set_title("Labelled Bottles Image")
         axs[1, 2].axis('off')
 
         axs[1, 3].imshow(colored_image, cmap="gray")

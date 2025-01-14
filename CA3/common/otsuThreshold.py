@@ -71,6 +71,7 @@ def apply_dual_otsu_threshold(image):
                 max_variance = variance_between
                 threshold1 = t1
                 threshold2 = t2
+
     binary_image = np.zeros_like(image, dtype=np.uint8)
     binary_image[image < threshold1] = 0
     binary_image[(image >= threshold1) & (image < threshold2)] = 1 
