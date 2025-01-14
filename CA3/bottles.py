@@ -102,8 +102,8 @@ if __name__ == "__main__":
                 print('Error threshold should be smaller than warning threshold')
                 sys.exit(1)
         else:
-            error_threshold=0.25
-            warning_threshold=0.02
+            error_threshold=0.2
+            warning_threshold=0.05
 
         # Blur
         kernel = averaging_kernel(size=9)
