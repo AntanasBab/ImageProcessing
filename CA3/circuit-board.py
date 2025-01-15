@@ -5,6 +5,7 @@ from common.otsuThreshold import (
     threshold_image,
 )
 from matplotlib import pyplot as plt
+import sys
 
 ROUND_SOLDERING_CENTERS = [[10, 59], [36, 59], [61, 58], [12, 87], [36, 86], [60, 88], 
  [23, 116], [48, 115], [22, 144], [49, 143], [187, 42], [188, 73], 
@@ -46,4 +47,8 @@ def analyze_image(circuit_board_file):
     plt.show()
 
 if __name__ == "__main__":
-    analyze_image("/home/antbab/ImageProcessing/CA3/ImgSetCa3/imgsetca3/pcb-xray.tif")
+    if len(sys.argv) != 2:
+        print("Usage: python3 circuit-board.py <circuit_board_file_path>")
+        sys.exit(1)
+
+    analyze_image(sys.argv[1])
