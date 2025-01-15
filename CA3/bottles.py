@@ -130,7 +130,7 @@ if __name__ == "__main__":
         ratios = calculate_ratios(labeled_image, bottles_binary[bottleneck_top_row - 1:,:], num_labels)
         colored_image = color_water_pixels(labeled_image, bottles_binary[bottleneck_top_row - 1:,:], num_labels, ratios, error_threshold, warning_threshold)
 
-        fig, axs = plt.subplots(2, 4, figsize=(10, 10))
+        fig, axs = plt.subplots(2, 4, figsize=(15, 10))
         axs[0, 0].imshow(image, cmap="gray", interpolation="nearest", vmin=0, vmax=255)
         axs[0, 0].set_title("Original Bottle Image")
         axs[0, 0].axis('off')
